@@ -1,0 +1,294 @@
+-- Databricks notebook source
+-- MAGIC %md
+-- MAGIC
+-- MAGIC <div style="text-align: center; line-height: 0; padding-top: 9px;">
+-- MAGIC   <img src="https://databricks.com/wp-content/uploads/2018/03/db-academy-rgb-1200px.png" alt="Databricks Learning">
+-- MAGIC </div>
+-- MAGIC
+
+-- COMMAND ----------
+
+-- MAGIC %md
+-- MAGIC ## 04 - AI/BI Dashboards
+-- MAGIC
+-- MAGIC Databricks AI/BI Dashboards offers an enhanced visualization library and a streamlined configuration experience to help you quickly transform data into shareable insights. 
+-- MAGIC
+-- MAGIC In this lesson, you will create a new dashboard and add data and visualizations to the dashboard based on table data and SQL queries.
+-- MAGIC
+-- MAGIC This lesson uses the following resources from  `dbacademy_retail.v01`:
+-- MAGIC * **sales** table
+-- MAGIC * **customers** table
+-- MAGIC
+-- MAGIC These tables contain some retail sales figures and customer order details. We'll be using them as the source data for the visualizations in the dashboard.
+-- MAGIC
+-- MAGIC **Note:** If you created a copy of the course tables in your `user_specific_schema` from the `dbacademy` catalog in **Lesson 01**, you can use those tables instead of the lesson specified defaults, but you'll need to manually edit the SQL queries as you use them.
+
+-- COMMAND ----------
+
+-- MAGIC %md
+-- MAGIC ### Part 1: Create a new Dashboard
+-- MAGIC Creating a new dashboard in Databricks is simple and straight forward. 
+-- MAGIC * Navigate to Dashboards in the side navigation pane.
+-- MAGIC * Select **Create dashboard**. 
+-- MAGIC * At the top of the resulting screen, click on the Dashboard name and change it to **Retail Dashboard**.
+-- MAGIC
+-- MAGIC You also have the option to import a dashboard if you already have one. All your existing Dashboards can be located from this area of the platform. There are also many quick create features throughout the platform that offer **Dashboards** as one of the options for creating them from other submenus.
+
+-- COMMAND ----------
+
+-- MAGIC %md
+-- MAGIC ### Part 2: Adding Data
+-- MAGIC
+-- MAGIC With a completely new Dashboard, you'll need to associate the dashboard to data before you can begin. You'll notice at the top of the dashboard screen, you have two tabs, **Canvas** and **Data**. 
+-- MAGIC
+-- MAGIC - **Canvas:** The Canvas tab allows users to create visualizations and construct their dashboards. Each item on the canvas is called a widget. Widgets have three types: visualizations, text boxes, and filters.
+-- MAGIC
+-- MAGIC - **Data:** The **Data** tab allows you to define datasets that you will use in the dashboard. Datasets are bundled with dashboards when sharing, importing, or exporting them using the UI or API.
+-- MAGIC
+-- MAGIC Select the **Data** tab to get started. 
+-- MAGIC
+-- MAGIC There are three icons on the left side of the screen: **Datasets**, **Catalog**, and **Assistant**. 
+-- MAGIC * **Catalog** allows you to navigate the available catalogs, schemas, and tables accessible to the workspace.
+-- MAGIC * **Assistant** provides you with a AI-powered interface for asking queries in natural language to the platform to discover objects or gain insights or assistance on query writing. 
+-- MAGIC * **Datasets** will present you with a list of all the Datasets and queries used for the dashboard. You can use multiple datasets in a single dashboard which can be selected from the list of available tables or created from SQL queries or. 
+-- MAGIC
+-- MAGIC The following steps walk you through adding the tables for this example dashboard.
+-- MAGIC
+-- MAGIC 1. With the **Datasets list** icon selected, click the **+ Select a table** button. </p>
+-- MAGIC 2. From the resulting pop-up, search for `dbacademy_retail.v01.sales`. </p>
+-- MAGIC 3. Click **sales** to add it as a dataset, and then select the **Confirm** button. Note that it appears in your dataset list </p>
+-- MAGIC 4. Repeat these steps to add the `customers` tables. </p>
+-- MAGIC
+-- MAGIC Note that each table is added to the list as an automatically populated `SELECT *` statement in the query editing panel. You can modify the SQL query to alter the dataset.
+
+-- COMMAND ----------
+
+-- MAGIC %md
+-- MAGIC ---
+-- MAGIC ### Part 3: Adding Visualizations
+-- MAGIC #### Visualization 1: Counter
+-- MAGIC
+-- MAGIC The first visualization we'll be adding to the dashboard is a counter visualization to display the current sales against a sales goal of $3 million.
+-- MAGIC
+-- MAGIC 1. In the **Data** tab, select the **+ Create from SQL** option. </p>
+-- MAGIC 2. Enter the following query into the query editing space:
+-- MAGIC `SELECT sum(total_price) AS Total_Sales, 3000000 AS Sales_Goal FROM dbacademy_retail.v01.sales;` </p>
+-- MAGIC 3. Click **Run** to execute the query. </p>
+-- MAGIC 4. Right-click the query in the **Datasets** list and select **Rename**, or use the kebab menu, to rename the query as **Count Total Sales**. </p>
+-- MAGIC 5. Return to the **Canvas** tab. </p>
+-- MAGIC 6. At the bottom of the screen you have a toolbar for moving objects, adding a visualization, adding a text box, and adding a filter. Select **Add a visualization**. </p>
+-- MAGIC 7. Move your cursor to anywhere on the screen and click to add the visualization to the canvas. </p>
+-- MAGIC 8. In the **Configuration Panel** on the right, make the following selections for the settings:
+-- MAGIC     - **Dataset:** Count Total Sales
+-- MAGIC     - **Visualization:** Counter
+-- MAGIC     - **Title:** Checked
+-- MAGIC       - Click on **Widget Title** on the visualization.
+-- MAGIC       - Change it to **Sales Goal**.
+-- MAGIC     - **Value:** Total_Sales
+-- MAGIC     - **Target:** Sales_Goal
+-- MAGIC
+-- MAGIC 9. Now, click on **Total_Sales** and select **Format** from the resulting dropdown. Then click **Custom**.  Make the following adjustments:
+-- MAGIC     - **Type:** Currency ($)
+-- MAGIC     - **Abbreviation:** None
+-- MAGIC     
+-- MAGIC 10. In the Style section, click the **+** next to **Conditional Style**. Configure it with the following settings:
+-- MAGIC     - If Value <= Target
+-- MAGIC     - Then (Color: Red)
+-- MAGIC
+-- MAGIC This is a really simple visualization but let's you get a feel for working with Visualizations on dashboards. You can adjust the placement and size of the visualization by dragging the edges or click-holding while hovering over the visualization box.
+
+-- COMMAND ----------
+
+-- MAGIC %md
+-- MAGIC ---
+-- MAGIC #### Visualization 2: Combo Chart
+-- MAGIC Next, let's add another visualization, this time a Combo Chart containing information about total sale price and count of sales over a three months span.
+-- MAGIC
+-- MAGIC 1. In the **Data** tab, select the **+ Create from SQL** option. </p>
+-- MAGIC 2. Enter and run the following query into the query editing space:
+-- MAGIC
+-- MAGIC ```
+-- MAGIC SELECT customer_name, 
+-- MAGIC        total_price AS Total_Sales, 
+-- MAGIC        date_format(order_date, "MM") AS Month, 
+-- MAGIC        product_category 
+-- MAGIC FROM dbacademy_retail.v01.sales 
+-- MAGIC WHERE order_date >= to_date('2019-08-01')
+-- MAGIC AND order_date <=  to_date('2019-10-31');
+-- MAGIC ```
+-- MAGIC </p>
+-- MAGIC
+-- MAGIC 3. Rename the Query to **Three Month Sales**. </p>
+-- MAGIC 4. Return to the **Canvas** tab.</p>
+-- MAGIC 5. Select **Add a visualization** from the menu at the bottom of the canvas and click on the canvas to add the visualization.</p>
+-- MAGIC 6. In the **Configuration Panel** on the right, make the following selections for the settings:
+-- MAGIC     - **Dataset:** Three Month Sales
+-- MAGIC     - **Visualization:** Combo
+-- MAGIC     - **X axis:** Month
+-- MAGIC     - **Y axis:**
+-- MAGIC       - **Left Y axis (Bar):** Total_Sales
+-- MAGIC         - **Display Name:** Total Sales Value
+-- MAGIC       - **Right Y axis (Line):** Total_Sales
+-- MAGIC         - Change **Right Y axis (Line)** to COUNT.
+-- MAGIC         - **Display Name:** Count of Sales Orders
+-- MAGIC 7. Select the kebab menu icon next to Y axis and click **Enable dual axis**.
+-- MAGIC
+-- MAGIC Enabling dual axis allows us to see changes in the data on two different scales. You can see that the number of sales in August and October was low, but the dollar amounts were high. The opposite is true in September.
+-- MAGIC
+-- MAGIC 8. Select the kebab menu icon next to **Left Y axis.**</p>
+-- MAGIC 9. Change the Type to **Currency ($)**.
+-- MAGIC
+-- MAGIC Note that the axis titles automatically adjust to the Display Name for the chart series. You can also adjust the colors for the series by selecting the color blocks next to series names.
+
+-- COMMAND ----------
+
+-- MAGIC %md
+-- MAGIC ---
+-- MAGIC #### Visualization 3: Bar Chart with Databricks Assistant
+-- MAGIC
+-- MAGIC When drafting a dashboard, you can provide a natural language prompt to the Databricks Assistant and it autogenerates a chart based on your request. The Databricks Assistant can help you build charts based on any dataset defined in your dashboard's data tab. Let's try it out.
+-- MAGIC
+-- MAGIC Complete the following steps:
+-- MAGIC
+-- MAGIC 1. Select **Add a visualization** from the menu at the bottom of the canvas and click on the canvas to add the visualization.
+-- MAGIC 2. In the text field at the top of your widget, enter the following prompt: </p>
+-- MAGIC
+-- MAGIC     _Create a bar chart with product_category on the x-axis and average total_sales on the y-axis_
+-- MAGIC
+-- MAGIC 3. Either press **Enter** or click **Submit** to generate a response. It may take a moment for the Assistant to provide a visualization. </p>
+-- MAGIC 5. You will get a bar chart that matches the provided description. Click <b>Accept</b> to confirm the visualization meets your needs. </p>
+-- MAGIC
+-- MAGIC   If the visualization does not match your description or match the kind of visualization you wanted to create, you can reject or regenerate the response. You can also adjust the configuration of the chart once accepted. Try changing the color of the visualization.
+-- MAGIC
+-- MAGIC
+-- MAGIC **Edit a Visualization with the Configuration Panel**
+-- MAGIC
+-- MAGIC Let's edit the generated chart to be a stacked bar chart by adding another measure on the y-axis.
+-- MAGIC
+-- MAGIC 1. Click the visualization widget on the canvas to open the configuration panel. </p>
+-- MAGIC 2. Change the dataset to **Three Months Sales**, if necessary.</p>
+-- MAGIC 3. Adjust the Y axis to the **Total_Sales** by clicking on it and selecting the column name, if you had to change the dataset. This is because the column names are different between Sales and Three Month Sales. </p>
+-- MAGIC 4. Add a second **Y axis** with Total_Sales. </p>
+-- MAGIC 5. Click the label and change the transformation to **MIN**. 
+-- MAGIC Your new chart shows a stacked bar chart with the Average Total_Sales and the Minimum Total_Sales. </p>
+-- MAGIC 6. Click the kebab to the right of <b>Y axis</b>. </p>
+-- MAGIC 7. Check the box next to <b>Enable dual axis</b>. </p> 
+-- MAGIC
+-- MAGIC You now have a dual-axis bar chart that shows each value according to its own scale. This visualization shows that, although the <b>Reagate</b> category has the highest minimum sales figure, it also has the lowest average total sales.
+
+-- COMMAND ----------
+
+-- MAGIC %md
+-- MAGIC ---
+-- MAGIC #### Visualization 4: Scatterplot
+-- MAGIC
+-- MAGIC Let's create one more chart, a scatterplot, to understand how sales values vary with different order dates. To make this scatterplot, complete the following steps:
+-- MAGIC
+-- MAGIC 1. Select **Add a visualization** from the menu at the bottom of the canvas and click on the canvas to add the visualization. </p>
+-- MAGIC 2. In the **Configuration Panel** on the right, make the following selections for the settings: 
+-- MAGIC
+-- MAGIC     - <b>Dataset</b>: sales
+-- MAGIC     - <b>Visualization</b>: Scatter
+-- MAGIC     - <b>X axis</b>: order_date
+-- MAGIC         - **Scale Type:** Continuous
+-- MAGIC         - **Transform:** DAILY
+-- MAGIC     - <b>Y axis</b>: total_price
+-- MAGIC         - **Scale Type:** Categorical
+-- MAGIC         - **Transform:** SUM
+
+-- COMMAND ----------
+
+-- MAGIC %md
+-- MAGIC ---
+-- MAGIC #### Adding a Text Box
+-- MAGIC
+-- MAGIC Let's add a name and a space for a text description of the dashboard to the canvas. When adding a new widget to the canvas, other widgets automatically move to accommodate your placement. You can use your mouse to move and resize widgets. To delete a widget, select it and then press the delete key. You can also manipulate the widgets through the use of the kebab menu icon in the upper right corner of each individual one.
+-- MAGIC
+-- MAGIC Complete the following steps to add a text box to the dashboard:
+-- MAGIC
+-- MAGIC 1. <p style="color: #0873FF"> Click the <b>Add a text box</b> icon and drag the widget to the top of your canvas. </p>
+-- MAGIC 2. Type: `# Retail organization`
+-- MAGIC
+-- MAGIC     **Note:** Text boxes use markdown. The `#` character in the included texts indicates that <b>Retail organization</b> is a level 1 heading. See <a href="https://www.markdownguide.org/basic-syntax/" target="_blank">this markdown guide</a> for more on basic markdown syntax.
+-- MAGIC
+
+-- COMMAND ----------
+
+-- MAGIC %md
+-- MAGIC ---
+-- MAGIC ### Part 4: Publishing and Sharing
+-- MAGIC
+-- MAGIC When your dashboard is complete, to share it with others, you need to publish it. 
+-- MAGIC
+-- MAGIC Published dashboards can be shared with other users in your workspace and with users registered at the account level. That means that users registered to your Databricks account, even if they have not been assigned workspace access or compute resources, can be given access to your dashboards.
+-- MAGIC
+-- MAGIC When you publish a dashboard, the default setting is to **embed credentials**. Embedding credentials in your published dashboard allows dashboard viewers to **use your credentials to access the data and power the queries that support it**. If you choose not to embed credentials, dashboard viewers use their own credentials to access necessary data and compute power. If a viewer does not have access to the default SQL warehouse that powers the dashboard, or if they do not have access to the underlying data, _visualizations will not render._
+-- MAGIC
+-- MAGIC To publish your dashboard, complete the following steps:
+-- MAGIC
+-- MAGIC 1. Click <b>Publish</b> in the upper-right corner of your dashboard. Read the setting and notes in the <b>Publish</b> dialog. </p>
+-- MAGIC 2. Click <b>Publish</b> in the lower-right corner of the dialog. The <b>Sharing</b> dialog should open afterward. If it does not open, you can select **Share** next to **Publish** at the top of the dashboard.
+-- MAGIC     - You can use the text field to search for individual users, or share the dashboard with a preconfigured group, like <b>Admins</b> or <b>All workspace users</b>. From this window, you can grant leveled privileges like <b>Can Manage</b> or <b>Can Edit</b>. See <a href="https://docs.databricks.com/en/security/auth-authz/access-control/index.html#lakeview" target="_blank">Dashboard ACLs</a> for details on permissions.
+-- MAGIC     - The bottom of the <b>Sharing</b> dialog controls view access. Use this setting to easily share with all account users.
+-- MAGIC 3. <p style="color: #0873FF"> Under <b>Sharing settings</b>, choose <b>Anyone in my organization can view</b> from the drop-down. Then, close the <b>Sharing</b> dialog. </p>
+-- MAGIC 4. <p style="color: #0873FF"> Use the drop-down near the top of the dashboard to switch between <b>Draft</b> and <b>Published</b> versions of your dashboard. </p>
+-- MAGIC
+-- MAGIC **Note:** When you edit your draft dashboard, viewers of the published dashboards do not see your changes until you republish. The published dashboard includes visualizations that are built on queries that can be refreshed as new data arrives. Dashboards are updated with new data automatically without republishing.
+
+-- COMMAND ----------
+
+-- MAGIC %md
+-- MAGIC ---
+-- MAGIC ### Part 5: Interactive Features: Field Filters
+-- MAGIC The dashboard you created in the lab is good for reporting, and viewers can use it to stay up-to-date on the most recent retail sales figures. However, the viewer has no controls that allow them to further explore the data. For example, if a user wants to see the data for a specific period, they would need to contact the dashboard author to request any changes.
+-- MAGIC
+-- MAGIC You can create user controls that allow the viewer to filter certain data based on a field or a parameter value. Filters are widgets that allow dashboard viewers to narrow down results by filtering on specific fields or setting dataset parameters. 
+-- MAGIC
+-- MAGIC Filters can be applied to fields of one or more datasets. Filters on fields allow users to focus on certain values, or ranges of values in the data. The filter applies to all visualizations built on the selected datasets.
+-- MAGIC
+-- MAGIC To add a filter to the dashboard, complete the following steps:
+-- MAGIC
+-- MAGIC 1. <p style="color: #0873FF"> Return to your dashboard if you've navigated away from it. </p>
+-- MAGIC
+-- MAGIC
+-- MAGIC     - From the **Dashboards** menu, select the **Owner** option and choose yourself to filter the view to just Dashboards you’ve created or own. 
+-- MAGIC
+-- MAGIC 2. <p style="color: #0873FF"> If viewing the published version, switch it to view the draft version of the dashboard. </p>
+-- MAGIC 3. <p style="color: #0873FF"> Click the <b>Filter</b> icon in the toolbar near the bottom of the canvas.
+-- MAGIC 4. Place the widget near the top of your dashboard. You may want to add it under your text box. You can rearrange the widgets on the dashboard to organize it the way you want. </p>
+-- MAGIC
+-- MAGIC 5. When the filter widget is selected, the filter configuration panel appears on the right side of the screen.
+-- MAGIC   
+-- MAGIC 5. <p style="color: #0873FF"> Apply the following settings: </p>
+-- MAGIC   - <b>Filter</b>: Single value
+-- MAGIC   - <b>Fields</b>: 
+-- MAGIC       - sales.product_category 
+-- MAGIC       - Three Month Sales.product_category
+-- MAGIC 6. <p style="color: #0873FF"> Use the checkboxes to turn on <b>Title</b>. </p>
+-- MAGIC 7. <p style="color: #0873FF"> Double-click the title on the widget and change it to <b>Product category</b> </p>
+-- MAGIC 8. <p style="color: #0873FF"> Use the drop-down in the filter widget to test your filter. </p>
+-- MAGIC
+-- MAGIC **Note:** The filter applies to each selected dataset in the filter configuration panel. All of the datasets you selected share the same range of values for product_category. A dashboard viewer can select from that list when choosing which data to filter on the dashboard.
+-- MAGIC
+-- MAGIC You can also use parameters to create interactive dashboards. Parameters allow users to customize visualizations by substituting values into dataset queries at runtime. See <a href="https://docs.databricks.com/en/dashboards/parameters.html" target="_blank">What are dashboard parameters?</a> to learn more as that is beyond the scope of this course.
+-- MAGIC
+-- MAGIC Remember to republish the dashboard after you've made edits to it in order for the published version to reflect your new filter.
+
+-- COMMAND ----------
+
+-- MAGIC %md
+-- MAGIC ---
+-- MAGIC The image below is supplied as an example of how your dashboard could appear once you've finished adding visualizations and customizing the colors and features of the dashboard. 
+-- MAGIC
+-- MAGIC ![04_Dashboard_Solution](files/images/get-started-with-sql-analytics-and-bi-on-databricks-4.0.3/04_Dashboard_Solution.png)
+
+-- COMMAND ----------
+
+-- MAGIC %md
+-- MAGIC
+-- MAGIC &copy; 2025 Databricks, Inc. All rights reserved.<br/>
+-- MAGIC Apache, Apache Spark, Spark and the Spark logo are trademarks of the 
+-- MAGIC <a href="https://www.apache.org/">Apache Software Foundation</a>.<br/>
+-- MAGIC <br/><a href="https://databricks.com/privacy-policy">Privacy Policy</a> | 
+-- MAGIC <a href="https://databricks.com/terms-of-use">Terms of Use</a> | 
+-- MAGIC <a href="https://help.databricks.com/">Support</a>
