@@ -397,13 +397,14 @@ dbutils.fs.rm(checkpoint_path, True)
 
 # COMMAND ----------
 
-# Configure Auto Loader to ingest CSV data to a Delta table
+from pyspark.sql.functions import col# Configure Auto Loader to ingest CSV data to a Delta table
+
 (spark.readStream
   .format("cloudFiles")
   .option("cloudFiles.format", "csv")
   .option("cloudFiles.schemaLocation", checkpoint_path)
   .load(file_path)
-  .select("*", input_file_name().alias("source_file"), current_timestamp().alias("processing_time"))
+  .select("*", current_timestamp().alias("processing_time")).withColumn("File_Name", col("_metadata.file_path"))
   .writeStream
   .option("checkpointLocation", checkpoint_path)
   .trigger(availableNow=True)
@@ -412,8 +413,8 @@ dbutils.fs.rm(checkpoint_path, True)
 # COMMAND ----------
 
 # MAGIC %sql
-# MAGIC
-# MAGIC select count(*) from employees_autoloader
+# MAGIC select * from employees_autoloader
+# MAGIC --select count(*) from employees_autoloader
 
 # COMMAND ----------
 

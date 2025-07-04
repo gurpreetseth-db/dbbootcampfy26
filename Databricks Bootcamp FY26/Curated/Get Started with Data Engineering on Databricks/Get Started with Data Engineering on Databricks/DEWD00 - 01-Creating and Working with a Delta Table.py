@@ -506,7 +506,7 @@ sdf.display()
 # COMMAND ----------
 
 # MAGIC %sql
-# MAGIC SELECT * FROM table_changes('current_employees', 5);
+# MAGIC SELECT * FROM table_changes('current_employees', 6);
 # MAGIC -- Note that we increment versions due to UPDATE statements above
 
 # COMMAND ----------

@@ -92,6 +92,10 @@
 
 -- COMMAND ----------
 
+-- MAGIC %run ./Setup/setup
+
+-- COMMAND ----------
+
 -- Take a moment to explore Focus mode. You can do the following:
 -- * Navigate between cells
 -- * Toggle Assistant
